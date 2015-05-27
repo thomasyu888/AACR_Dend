@@ -1,5 +1,5 @@
 shinyUI(fluidPage(
-  headerPanel("Interactive Dendrogram"),
+  headerPanel("AACR Abstract Clustering"),
 #sidebarPanel()
   mainPanel(
     iHeatmapOutput('myChart')
