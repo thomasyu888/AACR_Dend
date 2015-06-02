@@ -1,6 +1,3 @@
-if (!require(iHeatmap)) {
-  devtools::install_github("thomasyu888/Interactive-bioPlots")
-}
 library(iHeatmap)
 library(shiny)
 library(htmlwidgets)
