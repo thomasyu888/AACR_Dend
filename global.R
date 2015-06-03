@@ -4,13 +4,6 @@ library(htmlwidgets)
 library(synapseClient)
 synapseLogin()
 
-data < - synGet("syn4260702")
-annot <- synGet("syn4260703")
-m<- read.table(data@filePath,sep="\t")
-m <- as.matrix(m)
-d<- read.table(annot@filePath,sep="\t")
-d <- as.matrix(d)
-
 
 #aacrxls <- synGet("syn4229664")
 # options(java.parameters = "-Xmx1000M")
