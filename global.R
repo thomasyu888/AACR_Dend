@@ -21,5 +21,8 @@ for(i in 1:nrow(M)){
 }
 
 row.names(M) <- aacr$C_num
+
 Annotations <- matrix(aacr$Title)
 colnames(Annotations) <- "Title"
+
+
