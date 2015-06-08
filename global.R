@@ -3,27 +3,24 @@ library(shiny)
 library(htmlwidgets)
 library(synapseClient)
 synapseLogin()
+dat <- synGet('syn4260756')
+annot <- synGet("syn4260757")
+m<- read.delim(dat@filePath,sep="\t")
+d<- read.delim(annot@filePath,sep="\t")
 
-
-#aacrxls <- synGet("syn4229664")
-# options(java.parameters = "-Xmx1000M")
-# aacr <- readWorksheetFromFile(aacrxls@filePath,sheet="DOI_MAI")
-# aacrMAI <- aacr[,grepl("MAI", colnames(aacr))]
-# allterms <- sort(unique(unlist(apply(aacrMAI, 1, function(x){
-#   lapply(x, function(y) strsplit(y,"|",fixed=TRUE)[[1]][1])
-# }))))
-# 
-# M <- matrix(0, nrow=nrow(aacrMAI), ncol=length(allterms))
-# for(i in 1:nrow(M)){
-#   tmp <- aacrMAI[i,]
-#   foo <- t(sapply(tmp[!is.na(tmp)], function(y) strsplit(y,"|",fixed=TRUE)[[1]],USE.NAMES=FALSE))
-#   idxs <- which(allterms %in% foo[,1])
-#   M[i,idxs] <- as.numeric(gsub("\\(|\\)","",foo[,2]))
-# }
-# 
-# row.names(M) <- aacr$C_num
-# 
-# Annotations <- matrix(aacr$Title)
-# colnames(Annotations) <- "Title"
-
-
+h<- hclust(dist(m),method="ward.D2")
+cut <- cutree(h,k=20)
+annotation <- unlist(lapply(unique(cut), function(x) {
+  cluster <- fixed[which(cut[h$order]==x),]
+  allCone <- unique(unlist(apply(cluster, 1, function(j){
+    lapply(j, function(y) strsplit(y,"|",fixed=TRUE)[[1]][1])
+  })))
+  dog <- unlist(cluster)
+  dog <- unlist(lapply(dog, function(d) strsplit(d,"|",fixed=TRUE)[[1]][1]))
+  dog <- gsub(" ","",dog)
+  foo <- gsub(" ","",allCone)
+  temp <- unlist(lapply(foo, function(z) length(which(z==as.matrix(dog)))))
+  return (allCone[which(max(temp)==temp)])
+}))
+newcut <- annotation[cut]
+newcut <- matrix(newcut,dimnames=list(NULL,"Cluster"))
