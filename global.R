@@ -12,18 +12,21 @@ fix <- read.table(tem@filePath,sep="\t")
 
 h<- hclust(dist(m),method="ward.D2")
 cut <- cutree(h,k=20)
+fix <- fix[h$order,]
 
 annotation <- unlist(lapply(unique(cut), function(x) {
   cluster <- fix[which(cut[h$order]==x),]
   allCone <- unique(unlist(apply(cluster, 1, function(j){
     lapply(j, function(y) strsplit(y,"|",fixed=TRUE)[[1]][1])
   })))
-  dog <- as.matrix(unlist(cluster))
-  dog <- unlist(lapply(dog, function(d) strsplit(d,"|")[[1]][1]))
+  dog <- unlist(apply(cluster, 1, function(m){
+    lapply(m, function(o) strsplit(o,"|",fixed=TRUE)[[1]][1])
+  }))
   dog <- gsub(" ","",dog)
   foo <- gsub(" ","",allCone)
-  temp <- unlist(lapply(foo, function(z) length(which(z==as.matrix(dog)))))
+  temp <- unlist(lapply(foo, function(z) length(which(z==dog))))
   return (allCone[which(max(temp)==temp)])
 }))
+
 newcut <- annotation[cut]
 newcut <- matrix(newcut,dimnames=list(NULL,"Cluster"))
