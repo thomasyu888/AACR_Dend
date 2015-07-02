@@ -5,8 +5,8 @@ shinyUI(fluidPage(
   headerPanel("AACR Abstract Clustering"),
 #sidebarPanel()
   sidebarPanel(
-
-      h6(verbatimTextOutput('hovered')),width=4
+    tags$style(type="text/css", ".shiny-text-output {font-size: 10px;}"),
+    verbatimTextOutput('hovered')
   ),
   mainPanel(
     iHeatmapOutput('myChart')
