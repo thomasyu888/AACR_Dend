@@ -11,7 +11,7 @@ m<- read.delim(dat@filePath,sep="\t")
 d<- read.delim(annot@filePath,sep="\t")
 fix <- read.table(tem@filePath,sep="\t")
 
-h<- hclust(dist(m),method="ward.D")
+h<- hclust(dist(m),method="ward")
 cut <- cutree(h,k=50)
 fix <- fix[h$order,]
 

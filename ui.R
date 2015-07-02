@@ -1,7 +1,5 @@
 shinyUI(fluidPage(
 
-  
-  
   headerPanel("AACR Abstract Clustering"),
 #sidebarPanel()
   sidebarPanel(
