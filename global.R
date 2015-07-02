@@ -2,6 +2,7 @@ library(iHeatmap)
 library(shiny)
 library(htmlwidgets)
 library(synapseClient)
+
 synapseLogin()
 dat <- synGet('syn4260756')
 annot <- synGet("syn4260757")
@@ -10,8 +11,8 @@ m<- read.delim(dat@filePath,sep="\t")
 d<- read.delim(annot@filePath,sep="\t")
 fix <- read.table(tem@filePath,sep="\t")
 
-h<- hclust(dist(m),method="ward.D2")
-cut <- cutree(h,k=20)
+h<- hclust(dist(m),method="ward.D")
+cut <- cutree(h,k=50)
 fix <- fix[h$order,]
 
 annotation <- unlist(lapply(unique(cut), function(x) {
