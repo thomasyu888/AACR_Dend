@@ -6,6 +6,7 @@ shinyServer(function(input, output) {
                         CL = c('syn4588477','syn4588476','syn4588478'), 
                         ET = c('syn4588480','syn4588479','syn4588481'), 
                         MCB= c('syn4588483','syn4588482','syn4588484'),
+                        MCB10 = c('syn4591713','syn4591712','syn4591714'),
                         TB = c('syn4588486','syn4588485','syn4588487'))
     abstract <- total[input$Abstracts]
 
@@ -21,18 +22,19 @@ shinyServer(function(input, output) {
     fix <- fix[h$order,]
     cut<-dynamicTreeCut::cutreeDynamic(dendro = h,distM=as.matrix(dist(m)),maxCoreScatter = 0.99, minGap = (0.01*0.75),minClusterSize = 1,deepSplit=4,method = "hybrid")
     
-    annotation <- unlist(lapply(unique(cut), function(x) {
+    annotation <- unlist(lapply(sort(unique(cut)), function(x) {
       cluster <- fix[which(cut[h$order]==x),]
-      allCone <- unique(unlist(apply(cluster, 1, function(j){
+      uniqueterms <- unique(unlist(apply(cluster, 1, function(j){
         lapply(j, function(y) strsplit(y,"|",fixed=TRUE)[[1]][1])
       })))
-      dog <- unlist(apply(cluster, 1, function(m){
+      allterms <- unlist(apply(cluster, 1, function(m){
         lapply(m, function(o) strsplit(o,"|",fixed=TRUE)[[1]][1])
       }))
-      dog <- gsub(" ","",dog)
-      foo <- gsub(" ","",allCone)
-      temp <- unlist(lapply(foo, function(z) length(which(z==dog))))
-      return (paste(allCone[which(max(temp)==temp)],collapse=", "))
+      #get rid of all the spaces
+      allterms <- gsub(" ","",allterms)
+      foo <- gsub(" ","",uniqueterms) ##needs to be a temp variable, because we need to use unique terms
+      temp <- unlist(lapply(foo, function(z) length(which(z==allterms))))
+      return (paste(uniqueterms[which(max(temp)==temp)],collapse=", "))
     }))
     
     newcut <- annotation[cut]
@@ -45,5 +47,5 @@ shinyServer(function(input, output) {
   )
 })
 
-
+aacr
 
