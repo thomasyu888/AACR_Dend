@@ -47,5 +47,4 @@ shinyServer(function(input, output) {
   )
 })
 
-aacr
 
