@@ -2,46 +2,57 @@ library(synapseClient)
 shinyServer(function(input, output) {
   output$myChart <- renderIHeatmap({
     
-    total <- data.frame(AM = c('syn4260756','syn4260757','syn4382386'),
-                        CL = c('syn4588477','syn4588476','syn4588478'), 
-                        ET = c('syn4588480','syn4588479','syn4588481'), 
-                        MCB= c('syn4588483','syn4588482','syn4588484'),
-                        MCB10 = c('syn4591713','syn4591712','syn4591714'),
-                        TB = c('syn4588486','syn4588485','syn4588487'))
+  
     abstract <- total[input$Abstracts]
-
     dat <- synGet(as.character(abstract[1,1]))
     annot <- synGet(as.character(abstract[2,1]))
     tem <- synGet(as.character(abstract[3,1]))
+    
     m<- read.delim(dat@filePath,sep="\t")
     d<- read.delim(annot@filePath,sep="\t")
     fix <- read.table(tem@filePath,sep="\t")
     
-    h<- hclust(dist(m),method="ward")
-    #cut <- cutree(h,k=50)
-    fix <- fix[h$order,]
-    cut<-dynamicTreeCut::cutreeDynamic(dendro = h,distM=as.matrix(dist(m)),maxCoreScatter = 0.99, minGap = (0.01*0.75),minClusterSize = 1,deepSplit=4,method = "hybrid")
+    linkage <- input$Linkage
+   # height <- input$Cluster
     
-    annotation <- unlist(lapply(sort(unique(cut)), function(x) {
-      cluster <- fix[which(cut[h$order]==x),]
-      uniqueterms <- unique(unlist(apply(cluster, 1, function(j){
-        lapply(j, function(y) strsplit(y,"|",fixed=TRUE)[[1]][1])
-      })))
+    t <- hclust(dist(m),method=linkage)
+    fix <- fix[t$order,]
+    #cut <- cutree(t,h=t$height[height])
+   # cut<-dynamicTreeCut::cutreeDynamic(dendro = t,distM=as.matrix(dist(m)),cutHeight =t$height[height],
+     #                                  maxCoreScatter = 0.99, minGap = (0.01*0.75),deepSplit=4,
+     #                                 minClusterSize = 10,method = "hybrid")
+  # cut<-dynamicTreeCut::cutreeDynamic(dendro = t,cutHeight=0.75,minClusterSize = 10,deepSplit=TRUE,method = "tree")
+   
+  cut<-dynamicTreeCut::cutreeDynamic(dendro = t,cutHeight = t$height[length(t$height)],minClusterSize = 10,deepSplit=TRUE,method = "tree")
+  
+  annotation <- unlist(lapply(sort(unique(cut)), function(x) {
+      cluster <- fix[which(cut[t$order]==x),]
       allterms <- unlist(apply(cluster, 1, function(m){
         lapply(m, function(o) strsplit(o,"|",fixed=TRUE)[[1]][1])
       }))
+      uniqueterms <- unique(allterms)
       #get rid of all the spaces
       allterms <- gsub(" ","",allterms)
       foo <- gsub(" ","",uniqueterms) ##needs to be a temp variable, because we need to use unique terms
       temp <- unlist(lapply(foo, function(z) length(which(z==allterms))))
       return (paste(uniqueterms[which(max(temp)==temp)],collapse=", "))
     }))
-    
+    ## for when there are things not clustered by dynamic clustering
+    annotation <- c(annotation,"none")
+    cut[cut==0]=length(unique(cut))
     newcut <- annotation[cut]
-    newcut <- matrix(newcut,dimnames=list(NULL,"Cluster"))
+   
+   # print(unique(newcut))
+    print(min(cut))
+    print(length(unique(cut)))
+    print(max(cut))
+    print(max(table(cut)))
+    print(table(cut))
     
-    iHeatmap(t(m),addOnInfo = d,colAnnote = newcut,ClustM ="ward",legend_width = 0,Rowv = FALSE,showHeat = FALSE, width=600)
+    newcut <- matrix(newcut,dimnames=list(NULL,"Cluster"))
+    iHeatmap(t(m),addOnInfo = d,colAnnote = newcut,ClustM =linkage,Rowv = FALSE,showHeat = FALSE,xaxis_height = 40)
     })
+  
   output$hovered <- renderPrint(
     input$myChart_hover
   )
