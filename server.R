@@ -2,7 +2,7 @@ library(synapseClient)
 shinyServer(function(input, output) {
   output$myChart <- renderIHeatmap({
     
-  
+    
     abstract <- total[input$Abstracts]
     dat <- synGet(as.character(abstract[1,1]))
     annot <- synGet(as.character(abstract[2,1]))
@@ -13,19 +13,18 @@ shinyServer(function(input, output) {
     fix <- read.table(tem@filePath,sep="\t")
     
     linkage <- input$Linkage
-   # height <- input$Cluster
     
     t <- hclust(dist(m),method=linkage)
     fix <- fix[t$order,]
-    #cut <- cutree(t,h=t$height[height])
-   # cut<-dynamicTreeCut::cutreeDynamic(dendro = t,distM=as.matrix(dist(m)),cutHeight =t$height[height],
-     #                                  maxCoreScatter = 0.99, minGap = (0.01*0.75),deepSplit=4,
-     #                                 minClusterSize = 10,method = "hybrid")
-  # cut<-dynamicTreeCut::cutreeDynamic(dendro = t,cutHeight=0.75,minClusterSize = 10,deepSplit=TRUE,method = "tree")
-   
-  cut<-dynamicTreeCut::cutreeDynamic(dendro = t,cutHeight = t$height[length(t$height)],minClusterSize = 10,deepSplit=TRUE,method = "tree")
-  
-  annotation <- unlist(lapply(sort(unique(cut)), function(x) {
+    a=as.character(abstract[4,1])
+    a=as.integer(a)
+    
+    cut<-dynamicTreeCut::cutreeDynamic(dendro = t,distM=as.matrix(dist(m)),deepSplit = 4,minClusterSize = a,method = "hybrid")
+    #while (0 %in% cut) {
+    #  a=a-1
+     # cut<-dynamicTreeCut::cutreeDynamic(dendro = t,distM=as.matrix(dist(m)),deepSplit = 4,minClusterSize = a,method = "hybrid")
+    #}
+    annotation <- unlist(lapply(sort(unique(cut)), function(x) {
       cluster <- fix[which(cut[t$order]==x),]
       allterms <- unlist(apply(cluster, 1, function(m){
         lapply(m, function(o) strsplit(o,"|",fixed=TRUE)[[1]][1])
@@ -35,23 +34,26 @@ shinyServer(function(input, output) {
       allterms <- gsub(" ","",allterms)
       foo <- gsub(" ","",uniqueterms) ##needs to be a temp variable, because we need to use unique terms
       temp <- unlist(lapply(foo, function(z) length(which(z==allterms))))
-      return (paste(uniqueterms[which(max(temp)==temp)],collapse=", "))
+      top<- sort(temp,decreasing = TRUE)[1:2]
+      #return (paste(uniqueterms[which(top==temp)],collapse=", "))
+      return (paste(uniqueterms[temp%in%top],collapse=", "))
     }))
     ## for when there are things not clustered by dynamic clustering
-    annotation <- c(annotation,"none")
-    cut[cut==0]=length(unique(cut))
+    #annotation <- c(annotation,"none")
+    # cut[cut==0]=length(unique(cut))
     newcut <- annotation[cut]
-   
-   # print(unique(newcut))
-    print(min(cut))
-    print(length(unique(cut)))
-    print(max(cut))
-    print(max(table(cut)))
-    print(table(cut))
+    
+    # print(unique(newcut))
+    #print(max(table(newcut)))
+    #print(sum(table(newcut)<7))
+    #print(length(unique(cut)))
+    #print(max(cut))
+    #print(length(table(newcut)))
+    #print(table(cut))
     
     newcut <- matrix(newcut,dimnames=list(NULL,"Cluster"))
     iHeatmap(t(m),addOnInfo = d,colAnnote = newcut,ClustM =linkage,Rowv = FALSE,showHeat = FALSE,xaxis_height = 40)
-    })
+  })
   
   output$hovered <- renderPrint(
     input$myChart_hover

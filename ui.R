@@ -5,7 +5,7 @@ shinyUI(fluidPage(
   sidebarPanel(
     tags$style(type="text/css", ".shiny-text-output {font-size: 8px;}"),
     selectInput("Abstracts", "Choose an abstract:",
-                choices = c("AM","CL", "ET", "MCB","MCB10","TB"),selected="AM"),
+                choices = c("AM","CL", "ET", "MCB","MCB10","TB"),selected="CL"),
    # numericInput("Cluster", "Cut tree height (0-1):", 843,
     #             min = 0, max = 867),
     #sliderInput("Cluster", "Cluster amount: ", min= 0, max=10, 1,step=1),
@@ -19,7 +19,10 @@ shinyUI(fluidPage(
                             "ward.D"
                             #"centroid",
                             #"median"
-                            ),selected="ward.D2")
+                            ),selected="ward.D2")#,
+   #conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+    #                tags$div("Loading...",id="loadmessage")
+#   )
    # verbatimTextOutput('hovered')
     
 
