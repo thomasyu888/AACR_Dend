@@ -10,4 +10,6 @@ total <- data.frame(AM = c('syn4260756','syn4260757','syn4382386',7),
                     MCB= c('syn4588483','syn4588482','syn4588484',5),
                     MCB10 = c('syn4591713','syn4591712','syn4591714',5),
                     TB = c('syn4588486','syn4588485','syn4588487',7))
-
+cleanFun <- function(htmlString) {
+  return(gsub("<.*?>", "", htmlString))
+}
