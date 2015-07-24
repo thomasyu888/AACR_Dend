@@ -11,7 +11,7 @@ shinyServer(function(input, output) {
     d<- read.delim(annot@filePath,sep="\t")
     fix <- read.table(tem@filePath,sep="\t")
     
-    linkage <- input$Linkage
+    linkage <- "ward.D2"
     
     t <- hclust(dist(m),method=linkage)
     fix <- fix[t$order,]
@@ -25,6 +25,9 @@ shinyServer(function(input, output) {
     }
     
     annotation <- unlist(lapply(sort(unique(cut)), function(x) {
+      if (x==0) {
+        return ("Not clustered")
+      }
       cluster <- fix[which(cut[t$order]==x),]
       allterms <- t(sapply(cluster[!is.na(cluster)], function(y) strsplit(y,"|",fixed=TRUE)[[1]],USE.NAMES=FALSE))
       ##the first parenthesis is the frequency of the word in the abstract
@@ -48,16 +51,12 @@ shinyServer(function(input, output) {
       }
       #return (paste(uniqueterms[which(top==temp)],collapse=", "))
     }))
-    
-    newcut <- annotation[cut]
-    
-    # print(unique(newcut))
-    #print(max(table(newcut)))
-    #print(sum(table(newcut)<7))
-    #print(length(unique(cut)))
-    #print(max(cut))
-    #print(length(table(newcut)))
-    #print(table(cut))
+    ##If there are branches that are unclustered, 0 is in the 1st index
+    if (0%in% cut) {
+      newcut <- annotation[cut+1] 
+    } else {
+      newcut <- annotation[cut] 
+    }
     
     newcut <- matrix(newcut,dimnames=list(NULL,"Cluster"))
     iHeatmap(t(m),addOnInfo = d,colAnnote = newcut,ClustM =linkage,Rowv = FALSE,showHeat = FALSE,xaxis_height = 40)
